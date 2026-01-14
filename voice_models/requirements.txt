@@ -1,0 +1,37 @@
+torch==2.4.0
+torchaudio==2.4.0
+torchvision==0.19.0
+# --- API Server ---
+fastapi
+uvicorn
+python-multipart
+
+# --- Configuration & Utilities (ตัวที่ error ล่าสุด) ---
+hydra-core
+omegaconf
+wandb
+tqdm
+click
+matplotlib
+
+# --- AI & Model Support ---
+transformers>=4.40.0
+accelerate
+einops
+safetensors
+cached-path
+
+# --- Audio Processing ---
+librosa
+soundfile
+scipy
+numpy
+pydub
+jieba
+
+# --- TTS Specific Model Components ---
+vocos
+vector_quantize_pytorch
+f5-tts
+# หมายเหตุ: ไม่ใส่ torch, torchaudio เพราะเราใช้จาก Base Image (Docker) 
+# เพื่อป้องกันเวอร์ชันตีกันและปัญหา GPU

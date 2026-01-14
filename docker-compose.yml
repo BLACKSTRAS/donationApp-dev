@@ -1,0 +1,88 @@
+services:
+  donationapp_ui:
+    # Frontend service
+    build: ./donationapp_ui
+    container_name: donationapp_ui
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./donationapp_ui/app:/app/donationapp_ui/app
+      - /app/donationapp_ui/node_modules
+    networks:
+      - pgsite
+
+  donationapp_backend:
+    # Backend service
+    build:
+      context: ./donationapp_backend
+      dockerfile: Dockerfile
+    container_name: donationapp_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./donationapp_backend/src:/app/src
+      - /app/node_modules
+    networks:
+      - pgsite
+
+  db:
+    # PostgreSQL database service
+    image: postgres:16
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: always
+    ports:
+      - '5435:5432'
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_DB=donationapp_db
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=root
+    networks:
+      - pgsite
+
+  pg4:
+    # pgAdmin service
+    depends_on:
+      - db
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - '8080:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: postgres@domain.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    networks:
+      - pgsite
+      
+  voice_api:
+    build:
+      context: ./voice_models # <--- ชี้ไปที่โฟลเดอร์ที่มี Dockerfile และ api.py
+      dockerfile: Dockerfile
+    container_name: voice_api
+    ports:
+      - "5000:5000"
+    volumes:
+      - hf_cache:/root/.cache/huggingface
+      # Map เพื่อให้แก้ไขโค้ดได้โดยไม่ต้อง Rebuild
+      - ./voice_models:/app
+      - ./voice_models/temp_files:/app/temp_files
+      - C:/Users/supks/Documents/donationAppDev/shared/audios/voiceRef:/app/shared/audios/voiceRef
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    restart: unless-stopped
+    networks:
+      - pgsite
+
+networks:
+  pgsite:
+
+
+volumes:
+  db_data: # voice_models_data:  <-- อันนี้ไม่ได้ใช้ ลบออกได้ครับ
+  hf_cache:

@@ -1,0 +1,19 @@
+.p-inputtext:enabled:focus{
+  box-shadow: 0 0 0 3px rgb(255, 255, 255) !important;
+}
+.p-slider.p-slider-horizontal {
+    height: 1rem;
+}
+.p-slider:not(.p-disabled) .p-slider-handle:hover {
+    background: rgb(228, 30, 30) !important;
+    border-color: white !important;
+}
+.p-slider .p-slider-handle:focus {
+    outline-offset: 0 !important;
+    outline: 0 !important;
+    box-shadow: 0 0 0 .2rem white !important;
+}
+.p-slider .p-slider-handle {
+    background: rgb(235, 72, 72) !important;
+    border: 2px solid rgb(235, 72, 72) !important;
+}

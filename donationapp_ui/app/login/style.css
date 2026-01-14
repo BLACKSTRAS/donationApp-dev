@@ -1,0 +1,46 @@
+@import "tailwindcss";
+.p-inputtext:enabled:focus{
+    outline-offset: 0;
+    outline: 0;
+     box-shadow: none;
+}
+.p-inputtext:enabled{
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+
+}
+.p-inputtext:enabled:hover {
+     transform: scale(1.02); 
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.827);
+}
+.p-checkbox.p-highlight .p-checkbox-box {
+    background: #d9d9d929;
+    border-color: none;
+}
+.p-checkbox .p-checkbox-box {
+      background: #d9d9d929;
+}
+
+.p-checkbox:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-box {
+    border-color: rgba(100, 94, 94, 0.84);
+}
+.p-button.p-button-secondary:not(:disabled):hover, .p-button-group.p-button-secondary > .p-button:not(:disabled):hover, .p-splitbutton.p-button-secondary > .p-button:not(:disabled):hover, .p-fileupload-choose.p-button-secondary:not(:disabled):hover {
+    transform: scale(0.95); 
+}
+.p-button.p-button-secondary, .p-button-group.p-button-secondary > .p-button, .p-splitbutton.p-button-secondary > .p-button, .p-fileupload-choose.p-button-secondary {
+transition: transform 0.5s ease;
+}
+
+.p-tooltip-arrow {
+    border-style: solid !important;
+}
+
+/* ตัวอย่างลูกศรด้านบน */
+.p-tooltip-right .p-tooltip-arrow {
+    @apply border-l-0 border-r-[#d45555]
+}
+
+/* ตัวกล่อง tooltip */
+.p-tooltip .p-tooltip-text {
+    background-color: #d45555 !important;
+    color: white !important;
+}

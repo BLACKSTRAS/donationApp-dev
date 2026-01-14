@@ -1,0 +1,54 @@
+/* @import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;500;600;700&display=swap"); */
+@import "tailwindcss";
+
+/* body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #031436 6%, #090b11 48%, #031436 95%);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+} */
+
+/* .inconsolata {
+  font-family: "Inconsolata", monospace;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+} */
+
+html,
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge เก่า */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome / Safari */
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* ล็อกไม่ให้ body/html เลื่อน */
+  overscroll-behavior: none; /* กันเด้งแล้วเห็นพื้นขาว/แถบ */
+}
+
+body {
+  background: linear-gradient(135deg, #031436 6%, #090b11 48%, #031436 95%);
+  color: var(--foreground);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
