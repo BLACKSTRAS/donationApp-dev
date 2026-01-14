@@ -1,7 +1,7 @@
 "use client";
 
 import { UserInfoInterface } from "@/constants/models";
-import { getUserInfo } from "@/services/Uers/userInfo";
+import { getUserInfo } from "@/services/users/userInfo";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext<any>(null);

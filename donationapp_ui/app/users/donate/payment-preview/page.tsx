@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import Manubars from "../../../../components/Menubar_users";
+import Manubars from "@/components/Menubar_users";
 import { generatePromptPayQR } from "@/libs/utils/promptpay";
 
 /** -----------------------------

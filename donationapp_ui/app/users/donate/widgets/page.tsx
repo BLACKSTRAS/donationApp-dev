@@ -4,7 +4,7 @@ import Manubars from "@/components/Menubar_users";
 import WidgetVisualInner from "@/components/WidgetVisualInner";
 import { SettingDetails, WidgetType } from "@/constants/models";
 import BlockUI from "@/libs/BlockUi";
-import { getSettingDetails, previewWidget, saveSettingDetails } from "@/services/Uers/settingInfo";
+import { getSettingDetails, previewWidget, saveSettingDetails } from "@/services/users/settingInfo";
 import { Toast } from "primereact/toast";
 import React, { useEffect, useRef, useState } from "react";
 

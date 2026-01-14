@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import Manubars from "../../../../components/Menubar_users";
+import Manubars from "@/components/Menubar_users";
 import BlueBox from "@/components/blueBox";
-import { getUserDetailById } from "@/services/Uers/userInfo";
+import { getUserDetailById } from "@/services/users/userInfo";
 import { TextMessage } from "@/constants/textMessage";
 import {
   addWordFilter,
   addWordForDonat,
   deleteWordFilter,
   upDateMinAmout,
-} from "@/services/Uers/payment";
+} from "@/services/users/payment";
 import { Toast } from "primereact/toast";
 import BlockUI from "@/libs/BlockUi";
 import ConfirmDialog from "@/libs/ConformDialog";

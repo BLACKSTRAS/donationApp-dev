@@ -1,21 +1,20 @@
 "use client";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
 import "./style.css";
 import { useState, useRef } from "react";
 import { Toast } from "primereact/toast";
 import { loginUser } from "@/services/authService";
 import { ResponseData } from "@/constants/models";
 import { TextMessage } from "@/constants/textMessage";
-import { Tooltip } from "primereact/tooltip";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getUserInfo } from "@/services/uers/userInfo";
 import { useAuth } from "@/components/AuthProvider";
+import { getUserInfo } from "@/services/users/userInfo";
 
 export default function Login() {
   const router = useRouter();
-  const { setUser } = useAuth();
+
+  // const { setUser } = useAuth();
   const toast = useRef<Toast | null>(null);
   const [formData, setFormData] = useState({
     userName: "",
@@ -91,6 +90,10 @@ export default function Login() {
     });
   };
 
+  const auth = useAuth();
+  if (!auth) return null;
+  const { setUser } = auth;
+
   return (
     <>
       <div className=" min-h-screen w-full">
@@ -136,8 +139,9 @@ export default function Login() {
                   minLength={0}
                   name="userName"
                   value={formData.userName}
-                  className={`!bg-[#d9d9d929]  !text-white  ${error.userNameError ? "!border-red-400" : "!border-0"
-                    }`}
+                  className={`!bg-[#d9d9d929]  !text-white  ${
+                    error.userNameError ? "!border-red-400" : "!border-0"
+                  }`}
                   id="username"
                   aria-describedby="username-help"
                   tooltipOptions={{
@@ -178,8 +182,9 @@ export default function Login() {
                   name="password"
                   value={formData.password}
                   type="password"
-                  className={`!bg-[#d9d9d929]  !text-white  ${error.passwordError ? "!border-red-400" : "!border-0"
-                    }`}
+                  className={`!bg-[#d9d9d929]  !text-white  ${
+                    error.passwordError ? "!border-red-400" : "!border-0"
+                  }`}
                   id="password"
                   aria-describedby="username-help"
                   tooltipOptions={{

@@ -9,7 +9,7 @@ import "./style.css";
 import { Button } from "primereact/button";
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import test from "node:test";
-import { deleteVoiceModel, getListVoice, getVoiceIsUse, uploadVoiceRef, useVoiceModel } from "@/services/Uers/voiceTraining";
+import { deleteVoiceModel, getListVoice, getVoiceIsUse, uploadVoiceRef, useVoiceModel } from "@/services/users/voiceTraining";
 import { listVoicemodel, voicemodel } from "@/constants/models";
 import ConfirmDialog from "@/libs/ConformDialog";
 

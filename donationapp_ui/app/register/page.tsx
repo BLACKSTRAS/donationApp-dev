@@ -1,4 +1,5 @@
 "use client";
+
 import { InputText } from "primereact/inputtext";
 import { Checkbox } from "primereact/checkbox";
 import { Button } from "primereact/button";
@@ -9,13 +10,12 @@ import { Toast } from "primereact/toast";
 import { registerUser } from "@/services/authService";
 import { ResponseData } from "@/constants/models";
 import { TextMessage } from "@/constants/textMessage";
-import { getUserInfo } from "@/services/Uers/userInfo";
+import { getUserInfo } from "@/services/users/userInfo";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 
 export default function Register() {
   const router = useRouter();
-  const { setUser } = useAuth();
   const toast = useRef<Toast | null>(null);
   const [formData, setFormData] = useState({
     userName: "",
@@ -32,6 +32,9 @@ export default function Register() {
   });
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const auth = useAuth();
+  if (!auth) return null;
+  const { setUser } = auth;
 
   const handleFormChang = async (e: any) => {
     const { name, value } = e.target;
@@ -45,9 +48,7 @@ export default function Register() {
     e.preventDefault();
 
     if (!formData.checked) {
-      showError(
-        "กรุณายอมรับเงื่อนไขในการให้บริการและนโยบายความเป็นส่วนตัว"
-      );
+      showError("กรุณายอมรับเงื่อนไขในการให้บริการและนโยบายความเป็นส่วนตัว");
       return;
     }
 
@@ -123,6 +124,7 @@ export default function Register() {
     });
   };
   console.log(formData);
+
   return (
     <>
       <Toast ref={toast} />
@@ -161,8 +163,9 @@ export default function Register() {
                     }));
                   }
                 }}
-                className={`!bg-[#d9d9d929]  !text-white  ${errors.userName ? "!border-red-400" : "!border-0"
-                  }`}
+                className={`!bg-[#d9d9d929]  !text-white  ${
+                  errors.userName ? "!border-red-400" : "!border-0"
+                }`}
                 name="userName"
                 id="userName"
                 aria-describedby="username-help"
@@ -198,8 +201,9 @@ export default function Register() {
                   }
                 }}
                 type="email"
-                className={`!bg-[#d9d9d929]  !text-white  ${errors.email ? "!border-red-400" : "!border-0"
-                  }`}
+                className={`!bg-[#d9d9d929]  !text-white  ${
+                  errors.email ? "!border-red-400" : "!border-0"
+                }`}
                 tooltipOptions={{ position: "right", disabled: !errors.email }}
                 tooltip={`${errors.email}`}
                 name="email"
@@ -232,8 +236,9 @@ export default function Register() {
                   }
                 }}
                 type="password"
-                className={`!bg-[#d9d9d929]  !text-white  ${errors.password ? "!border-red-400" : "!border-0"
-                  }`}
+                className={`!bg-[#d9d9d929]  !text-white  ${
+                  errors.password ? "!border-red-400" : "!border-0"
+                }`}
                 tooltipOptions={{
                   position: "right",
                   disabled: !errors.password,
@@ -269,8 +274,9 @@ export default function Register() {
                   }
                 }}
                 type="password"
-                className={`!bg-[#d9d9d929]  !text-white  ${errors.confirmPassword ? "!border-red-400" : "!border-0"
-                  }`}
+                className={`!bg-[#d9d9d929]  !text-white  ${
+                  errors.confirmPassword ? "!border-red-400" : "!border-0"
+                }`}
                 tooltipOptions={{
                   position: "right",
                   disabled: !errors.confirmPassword,

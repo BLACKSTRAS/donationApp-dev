@@ -39,13 +39,13 @@ const app = express();
 /* =====================================================
    ✅ CLOUD / RAILWAY CONFIG
    ===================================================== */
-const PORT = process.env.PORT || 8000;
+const PORT = Number(process.env.PORT) || 8000;
 
 /* =========================
    Middleware
    ========================= */
 
-/* ❌ LOCAL CORS */
+/* ❌ LOCAL CORS (ของเดิม) */
 // app.use(
 //   cors({
 //     origin: "http://localhost:3000",
@@ -77,9 +77,9 @@ app.use(cookieParser());
 // );
 
 /* =====================================================
-   ✅ NOTE
-   Profile image ควรย้ายไป Supabase Storage
-   (เหมือนเสียง) → ไม่ใช้ static local
+   NOTE:
+   - Profile image / audio ใช้ Supabase Storage
+   - ไม่ใช้ static local path บน production
    ===================================================== */
 
 /* =========================
@@ -100,12 +100,11 @@ app.use("/api/admin", dashboardRoute);
 app.use("/api/admin/voices", voicesRoute);
 
 /* =========================
-   Health / DB test
+   Health / DB Test
    ========================= */
 app.get("/", async (_req: Request, res: Response) => {
   try {
-    await pool.connect();
-    const result = await pool.query("SELECT 1");
+    await pool.query("SELECT 1");
     res.json({
       status: "ok",
       db: "connected",
@@ -118,7 +117,7 @@ app.get("/", async (_req: Request, res: Response) => {
 });
 
 /* =========================
-   Static (ถ้ามี frontend build)
+   Static (optional)
    ========================= */
 app.use(express.static(path.join(__dirname, "../public")));
 
@@ -201,3 +200,21 @@ server.listen(PORT, () => {
   console.log(`📡 PORT: ${PORT}`);
   console.log("================================");
 });
+
+/* =========================
+   Graceful Shutdown (สำคัญ)
+   ป้องกัน port ค้างเวลา dev/restart
+   ========================= */
+const shutdown = () => {
+  console.log("🛑 Shutting down server...");
+  server.close(() => {
+    console.log("✅ HTTP server closed");
+    pool.end().finally(() => {
+      console.log("✅ DB pool closed");
+      process.exit(0);
+    });
+  });
+};
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
