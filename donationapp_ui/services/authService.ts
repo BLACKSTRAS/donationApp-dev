@@ -9,19 +9,15 @@ export async function registerUser(
   email: string,
   password: string
 ): Promise<ResponseData> {
-  const payload = {
-    username,
-    email,
-    password,
-  };
+  const payload = { username, email, password };
 
-  const response = await fetch(`${API_BASEURL}/auth/register`, {
+  const response = await fetch(`${API_BASEURL}/api/auth/register`, {
     method: "POST",
+    credentials: "include", // ⭐ cookie ข้ามโดเมน
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
-    credentials: "include", // 🔑 cookie ข้ามโดเมน
   });
 
   return response.json();
@@ -34,18 +30,15 @@ export async function loginUser(
   username: string,
   password: string
 ): Promise<ResponseData> {
-  const payload = {
-    username,
-    password,
-  };
+  const payload = { username, password };
 
-  const response = await fetch(`${API_BASEURL}/auth/login`, {
+  const response = await fetch(`${API_BASEURL}/api/auth/login`, {
     method: "POST",
+    credentials: "include", // ⭐ สำคัญที่สุด
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
-    credentials: "include", // 🔑 cookie ข้ามโดเมน
   });
 
   return response.json();
@@ -56,15 +49,12 @@ export async function loginUser(
    ===================================================== */
 export async function logoutUser(): Promise<void> {
   try {
-    await fetch(`${API_BASEURL}/auth/logout`, {
+    await fetch(`${API_BASEURL}/api/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
   } catch (error) {
-    console.warn(
-      "⚠ Backend logout failed, force client logout",
-      error
-    );
+    console.warn("⚠ Backend logout failed, force client logout", error);
   } finally {
     handleClientLogout();
   }
@@ -77,7 +67,5 @@ const handleClientLogout = () => {
   localStorage.clear();
   sessionStorage.clear();
 
-  // ลบ cookie ฝั่ง client (เผื่อกรณี fallback)
-  document.cookie =
-    "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 };
