@@ -36,6 +36,13 @@ const app = express();
 const server = http.createServer(app);
 
 /* =========================
+   🔴 TRUST PROXY (สำคัญที่สุด)
+   =========================
+   Railway / HTTPS / Secure Cookie
+*/
+app.set("trust proxy", 1);
+
+/* =========================
    ENV / PORT
    ========================= */
 const PORT = Number(process.env.PORT) || 8000;
@@ -46,9 +53,9 @@ const FRONTEND_ORIGIN = "https://donation-app-dev.vercel.app";
    ========================= */
 
 /**
- * ✅ CORS (สำคัญมาก)
+ * ✅ CORS (ของคุณถูกแล้ว)
  * - ห้ามใช้ *
- * - รองรับ cookie ข้ามโดเมน
+ * - ต้อง credentials: true
  */
 app.use(
   cors({
@@ -60,6 +67,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 /* =========================

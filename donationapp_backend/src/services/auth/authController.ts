@@ -13,13 +13,28 @@ import {
 dotenv.config();
 
 /* =====================================================
-   ✅ COOKIE OPTIONS (PRODUCTION / CROSS-DOMAIN)
+   ✅ COOKIE OPTIONS
    ===================================================== */
+
+/**
+ * ใช้สำหรับ set cookie (login / register)
+ */
 const cookieOptions = {
   httpOnly: true,
-  secure: true, // ✅ HTTPS เท่านั้น
-  sameSite: "none" as const, // ✅ cross-domain
-  maxAge: 1000 * 60 * 60 * 24,
+  secure: true, // 🔴 HTTPS only (Railway)
+  sameSite: "none" as const, // 🔴 cross-domain
+  path: "/",
+  maxAge: 1000 * 60 * 60 * 24, // 1 day
+};
+
+/**
+ * ใช้สำหรับ clear cookie (logout)
+ * ❗ ต้อง match key สำคัญเหมือนตอน set
+ */
+const clearCookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none" as const,
   path: "/",
 };
 
@@ -50,17 +65,16 @@ export const registerUser = async (req: Request, res: Response) => {
 
   if (checkDuplicateUser.rowCount! > 0) {
     if (checkDuplicateUser.rows[0].user_name === username) {
-      return res
-        .status(409)
-        .json({
-          message: ResponseMessage.USER_USERNAME_DUPLICATE,
-          status: 409,
-        });
+      return res.status(409).json({
+        message: ResponseMessage.USER_USERNAME_DUPLICATE,
+        status: 409,
+      });
     }
     if (checkDuplicateUser.rows[0].email === email) {
-      return res
-        .status(409)
-        .json({ message: ResponseMessage.USER_EMAIL_DUPLICATE, status: 409 });
+      return res.status(409).json({
+        message: ResponseMessage.USER_EMAIL_DUPLICATE,
+        status: 409,
+      });
     }
   }
 
@@ -69,9 +83,10 @@ export const registerUser = async (req: Request, res: Response) => {
   try {
     const creatUser = await creatNewUser(username, email, hashedPassword);
     if (!creatUser) {
-      return res
-        .status(400)
-        .json({ message: ResponseMessage.USER_REGISTER_FAILED, status: 400 });
+      return res.status(400).json({
+        message: ResponseMessage.USER_REGISTER_FAILED,
+        status: 400,
+      });
     }
 
     const token = genarateToken(
@@ -86,9 +101,10 @@ export const registerUser = async (req: Request, res: Response) => {
       status: 201,
     });
   } catch {
-    return res
-      .status(500)
-      .json({ message: ResponseMessage.USER_REGISTER_FAILED, status: 500 });
+    return res.status(500).json({
+      message: ResponseMessage.USER_REGISTER_FAILED,
+      status: 500,
+    });
   }
 };
 
@@ -99,9 +115,10 @@ export const loginUser = async (req: Request, res: Response) => {
   const { username, password } = req.body as AuthInterface;
 
   if (!username || !password) {
-    return res
-      .status(400)
-      .json({ message: ResponseMessage.INVALID_INPUT, status: 400 });
+    return res.status(400).json({
+      message: ResponseMessage.INVALID_INPUT,
+      status: 400,
+    });
   }
 
   try {
@@ -111,44 +128,50 @@ export const loginUser = async (req: Request, res: Response) => {
     );
 
     if (userResult.rowCount === 0) {
-      return res
-        .status(401)
-        .json({ message: ResponseMessage.USER_EMPTY, status: 401 });
+      return res.status(401).json({
+        message: ResponseMessage.USER_EMPTY,
+        status: 401,
+      });
     }
 
     const user = userResult.rows[0];
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res
-        .status(401)
-        .json({ message: ResponseMessage.USER_PASSWORD_INVALID, status: 401 });
+      return res.status(401).json({
+        message: ResponseMessage.USER_PASSWORD_INVALID,
+        status: 401,
+      });
     }
 
     if (user.status !== 1) {
-      return res
-        .status(401)
-        .json({ message: "สถานะบัญชีถูกระงับ", status: 401 });
+      return res.status(401).json({
+        message: "สถานะบัญชีถูกระงับ",
+        status: 401,
+      });
     }
 
     const token = genarateToken(String(user.user_id), user.role);
+
     res.cookie("token", token, cookieOptions);
 
-    return res
-      .status(200)
-      .json({ message: ResponseMessage.USER_LOGIN_SUCCESS, status: 200 });
+    return res.status(200).json({
+      message: ResponseMessage.USER_LOGIN_SUCCESS,
+      status: 200,
+    });
   } catch {
-    return res
-      .status(500)
-      .json({ message: ResponseMessage.USER_LOGIN_FAILED, status: 500 });
+    return res.status(500).json({
+      message: ResponseMessage.USER_LOGIN_FAILED,
+      status: 500,
+    });
   }
 };
 
 /* =====================================================
    LOGOUT
    ===================================================== */
-export const logoutUser = (req: Request, res: Response) => {
-  res.clearCookie("token", cookieOptions);
+export const logoutUser = (_req: Request, res: Response) => {
+  res.clearCookie("token", clearCookieOptions);
 
   return res.status(200).json({
     message: ResponseMessage.USER_LOGOUT_SUCCESS,
@@ -183,7 +206,9 @@ export const authMiddleware = (
 
     next();
   } catch {
-    return res.status(401).json({ message: ResponseMessage.FAIL_DATA });
+    return res.status(401).json({
+      message: ResponseMessage.FAIL_DATA,
+    });
   }
 };
 
