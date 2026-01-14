@@ -29,58 +29,38 @@ import usersRoute from "./services/admin/users/usersRoute";
 import voicesRoute from "./services/admin/voices/voicesRoute";
 import widgetRoute from "./services/user/widget/widgetRoute";
 
+/* =========================
+   App / Server
+   ========================= */
 const app = express();
+const server = http.createServer(app);
 
-/* =====================================================
-   ❌ LOCAL CONFIG (ของเดิม)
-   ===================================================== */
-// const PORT = 8000;
-
-/* =====================================================
-   ✅ CLOUD / RAILWAY CONFIG
-   ===================================================== */
+/* =========================
+   ENV / PORT
+   ========================= */
 const PORT = Number(process.env.PORT) || 8000;
+const FRONTEND_ORIGIN = "https://donation-app-dev.vercel.app";
 
 /* =========================
    Middleware
    ========================= */
 
-/* ❌ LOCAL CORS (ของเดิม) */
-// app.use(
-//   cors({
-//     origin: "http://localhost:3000",
-//     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//     credentials: true,
-//   })
-// );
-
-/* ✅ PRODUCTION CORS */
+/**
+ * ✅ CORS (สำคัญมาก)
+ * - ห้ามใช้ *
+ * - รองรับ cookie ข้ามโดเมน
+ */
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: FRONTEND_ORIGIN,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use(express.json());
 app.use(cookieParser());
-
-/* =====================================================
-   ❌ LOCAL STATIC FILE (PROFILE IMAGE)
-   ===================================================== */
-// app.use(
-//   "/images/profiles",
-//   express.static(
-//     "C:/Users/supks/Documents/donationAppDev/shared/images/profiles"
-//   )
-// );
-
-/* =====================================================
-   NOTE:
-   - Profile image / audio ใช้ Supabase Storage
-   - ไม่ใช้ static local path บน production
-   ===================================================== */
 
 /* =========================
    API Routes
@@ -95,12 +75,12 @@ app.use("/api/paymentInfo", paymentInfoRoute);
 app.use("/api/payment", paymentRoute);
 app.use("/api/widgetSetting", widgetRoute);
 app.use("/api/admin/donations", donationsRoute);
-app.use("/api/users", usersRoute);
+app.use("/api/admin/users", usersRoute);
 app.use("/api/admin", dashboardRoute);
 app.use("/api/admin/voices", voicesRoute);
 
 /* =========================
-   Health / DB Test
+   Health Check
    ========================= */
 app.get("/", async (_req: Request, res: Response) => {
   try {
@@ -122,25 +102,24 @@ app.get("/", async (_req: Request, res: Response) => {
 app.use(express.static(path.join(__dirname, "../public")));
 
 /* =========================
-   HTTP + Socket.IO
+   Socket.IO
    ========================= */
-const server = http.createServer(app);
-
 export const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: FRONTEND_ORIGIN,
+    credentials: true,
   },
 });
 
 /* =========================
-   Socket.IO Logic
+   Socket Auth
    ========================= */
 io.on("connection", async (socket: Socket) => {
   try {
     const token = socket.handshake.auth?.token;
 
     if (!token) {
-      console.warn("No widget token");
+      console.warn("❌ No widget token");
       return socket.disconnect();
     }
 
@@ -150,7 +129,7 @@ io.on("connection", async (socket: Socket) => {
     );
 
     if (!result.rowCount) {
-      console.warn("Invalid widget token");
+      console.warn("❌ Invalid widget token");
       return socket.disconnect();
     }
 
@@ -169,7 +148,7 @@ io.on("connection", async (socket: Socket) => {
 });
 
 /* =========================
-   Emit Donation Event
+   Emit Donation
    ========================= */
 export function emitDonation(data: {
   steamerId: number;
@@ -202,8 +181,7 @@ server.listen(PORT, () => {
 });
 
 /* =========================
-   Graceful Shutdown (สำคัญ)
-   ป้องกัน port ค้างเวลา dev/restart
+   Graceful Shutdown
    ========================= */
 const shutdown = () => {
   console.log("🛑 Shutting down server...");
