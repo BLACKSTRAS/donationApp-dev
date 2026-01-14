@@ -3,12 +3,13 @@ import { TextMessage } from "@/constants/textMessage";
 import { API_BASEURL } from "@/constants/api";
 
 /* =====================================================
-   Get User Info
+   Get User Info (สำคัญที่สุด)
    ===================================================== */
 export async function getUserInfo(): Promise<UserInfoInterface> {
   const response = await fetch(`${API_BASEURL}/api/user/getUserInfo`, {
     method: "GET",
-    credentials: "include", // 🔑 สำคัญมาก (cookie)
+    credentials: "include", // 🔑 cookie
+    cache: "no-store", // 🔴 ห้าม cache
   });
 
   if (!response.ok) {
@@ -36,9 +37,10 @@ export async function getDonateHistory(tableOption: DonationRes) {
   try {
     const res = await fetch(`${API_BASEURL}/api/histories/donateHistory`, {
       method: "POST",
+      credentials: "include",
+      cache: "no-store", // 🔴
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-      credentials: "include",
     });
 
     if (!res.ok) throw new Error(TextMessage.SYSYTEM_FAULD);
@@ -56,6 +58,7 @@ export async function getUserDetailById(): Promise<any> {
   const response = await fetch(`${API_BASEURL}/api/account/getUserDetailById`, {
     method: "GET",
     credentials: "include",
+    cache: "no-store", // 🔴
   });
 
   if (!response.ok) {
@@ -76,9 +79,10 @@ export async function updateUserContact(email?: string, telephone?: string) {
 
   const response = await fetch(`${API_BASEURL}/api/account/contact`, {
     method: "PATCH",
+    credentials: "include",
+    cache: "no-store", // 🔴
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -108,9 +112,10 @@ export async function updatePersonalByUserId(
 
   const response = await fetch(`${API_BASEURL}/api/account/personal`, {
     method: "PATCH",
+    credentials: "include",
+    cache: "no-store", // 🔴
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -138,9 +143,10 @@ export async function updateAddressByUserId(
 
   const response = await fetch(`${API_BASEURL}/api/account/address`, {
     method: "PATCH",
+    credentials: "include",
+    cache: "no-store", // 🔴
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -170,9 +176,10 @@ export async function updatePaymentByUserId(
 
   const response = await fetch(`${API_BASEURL}/api/account/payment`, {
     method: "PATCH",
+    credentials: "include",
+    cache: "no-store", // 🔴
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -191,8 +198,9 @@ export async function uploadUserProfile(file: File) {
 
   const response = await fetch(`${API_BASEURL}/api/account/upload/avatar`, {
     method: "POST",
-    body: formData,
     credentials: "include",
+    cache: "no-store", // 🔴
+    body: formData,
   });
 
   if (!response.ok) {
