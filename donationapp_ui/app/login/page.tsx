@@ -2,7 +2,7 @@
 
 import { InputText } from "primereact/inputtext";
 import "./style.css";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Toast } from "primereact/toast";
 import { loginUser } from "@/services/authService";
 import { ResponseData } from "@/constants/models";
@@ -27,7 +27,13 @@ export default function Login() {
 
   const auth = useAuth();
   if (!auth) return null;
-  const { refreshUser } = auth; // 🔴 ใช้ตัวเดียวกับ Register
+  const { refreshUser, user, loading } = auth;
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/users/account");
+    }
+  }, [user, loading, router]);
 
   const handleFormChang = (e: any) => {
     const { name, value } = e.target;
