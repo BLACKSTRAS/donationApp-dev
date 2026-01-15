@@ -32,7 +32,7 @@ services:
       - db_data:/var/lib/postgresql/data
     restart: always
     ports:
-      - '5435:5432'
+      - "5435:5432"
     environment:
       - PGDATA=/var/lib/postgresql/data/pgdata
       - POSTGRES_DB=donationapp_db
@@ -48,13 +48,13 @@ services:
     image: dpage/pgadmin4
     restart: always
     ports:
-      - '8080:80'
+      - "8080:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: postgres@domain.com
       PGADMIN_DEFAULT_PASSWORD: root
     networks:
       - pgsite
-      
+
   voice_api:
     build:
       context: ./voice_models # <--- ชี้ไปที่โฟลเดอร์ที่มี Dockerfile และ api.py
@@ -67,21 +67,21 @@ services:
       # Map เพื่อให้แก้ไขโค้ดได้โดยไม่ต้อง Rebuild
       - ./voice_models:/app
       - ./voice_models/temp_files:/app/temp_files
-      - C:/Users/supks/Documents/donationAppDev/shared/audios/voiceRef:/app/shared/audios/voiceRef
+      # - C:/Users/supks/Documents/donationAppDev/shared/audios/voiceRef:/app/shared/audios/voiceRef
+      - C:/Users/black/Desktop/donationApp/shared/audios/voiceRef:/app/shared/audios/voiceRef
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [ gpu ]
+              capabilities: [gpu]
     restart: unless-stopped
     networks:
       - pgsite
 
 networks:
   pgsite:
-
 
 volumes:
   db_data: # voice_models_data:  <-- อันนี้ไม่ได้ใช้ ลบออกได้ครับ

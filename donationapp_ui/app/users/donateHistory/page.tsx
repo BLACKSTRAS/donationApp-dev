@@ -3,7 +3,7 @@
 import Manubars from "@/components/Menubar_users";
 import React, { useEffect, useMemo, useState } from "react";
 import { DonationRes } from "@/constants/models";
-import { getDonateHistory } from "@/services/users/userInfo";
+import { getDonateHistory } from "@/services/Uers/userInfo";
 const headers = [
   { key: "donate_at", label: "เวลาที่โดเนท" },
   { key: "donate_by", label: "ชื่อผู้ใช้" },

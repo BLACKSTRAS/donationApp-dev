@@ -12,7 +12,7 @@ import {
   updatePersonalByUserId,
   updateUserContact,
   uploadUserProfile,
-} from "@/services/users/userInfo";
+} from "@/services/Uers/userInfo";
 import { TextMessage } from "@/constants/textMessage";
 import { formatDate } from "@/libs/formatType";
 import {

@@ -1,20 +1,11 @@
 import express, { Request, Response } from "express";
-import http from "http";
-import { Server, Socket } from "socket.io";
+import http from "http"; // ต้อง import http
+import { Server, Socket } from "socket.io"; // import socket.io
 import { pool } from "./common/constants/db";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import dotenv from "dotenv";
-import path from "path";
 
-/* =========================
-   Load ENV
-   ========================= */
-dotenv.config();
-
-/* =========================
-   Import routes
-   ========================= */
+// Import routes
 import authRouter from "./services/auth/authRoutes";
 import manageRouter from "./services/user/manage/manageRoute";
 import donateHistoryRouter from "./services/user/histories/donateHistoryRoute";
@@ -23,56 +14,35 @@ import accountRoute from "./services/user/account/accountRoute";
 import voiceTrainingRoute from "./services/user/voiceTraining/voiceTrainingRoute";
 import paymentInfoRoute from "./services/client/paymentInfo/paymentInfoRoute";
 import paymentRoute from "./services/user/payment/paymentRoute";
+import path from "path";
 import donationsRoute from "./services/admin/donations/donationsRoute";
 import dashboardRoute from "./services/admin/dashboard/dashboardRoute";
 import usersRoute from "./services/admin/users/usersRoute";
 import voicesRoute from "./services/admin/voices/voicesRoute";
-import widgetRoute from "./services/user/widget/widgetRoute";
+import widgetRoute from './services/user/widget/widgetRoute';
 
-/* =========================
-   App / Server
-   ========================= */
 const app = express();
-const server = http.createServer(app);
+const PORT = 8000;
 
-/* =========================
-   🔴 TRUST PROXY (สำคัญที่สุด)
-   =========================
-   Railway / HTTPS / Secure Cookie
-*/
-app.set("trust proxy", 1);
-
-/* =========================
-   ENV / PORT
-   ========================= */
-const PORT = Number(process.env.PORT) || 8000;
-const FRONTEND_ORIGIN = "https://donation-app-dev.vercel.app";
-
-/* =========================
-   Middleware
-   ========================= */
-
-/**
- * ✅ CORS (ของคุณถูกแล้ว)
- * - ห้ามใช้ *
- * - ต้อง credentials: true
- */
+// Middleware
 app.use(
   cors({
-    origin: FRONTEND_ORIGIN,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
-
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-/* =========================
-   API Routes
-   ========================= */
+app.use(
+  "/images/profiles",
+  express.static(
+   "C:\\Users\\black\\Desktop\\donationApp\\shared\\images\\profiles"
+  )
+);
+
 app.use("/api/auth", authRouter);
 app.use("/api/manage", manageRouter);
 app.use("/api/user", userInfoRoutes);
@@ -81,126 +51,93 @@ app.use("/api/account", accountRoute);
 app.use("/api/voiceTraining", voiceTrainingRoute);
 app.use("/api/paymentInfo", paymentInfoRoute);
 app.use("/api/payment", paymentRoute);
-app.use("/api/widgetSetting", widgetRoute);
+app.use('/api/widgetSetting', widgetRoute)
 app.use("/api/admin/donations", donationsRoute);
-app.use("/api/admin/users", usersRoute);
+app.use("/api/users", usersRoute);
 app.use("/api/admin", dashboardRoute);
 app.use("/api/admin/voices", voicesRoute);
 
-/* =========================
-   Health Check
-   ========================= */
-app.get("/", async (_req: Request, res: Response) => {
+
+app.get("/", async (req: Request, res: Response) => {
   try {
-    await pool.query("SELECT 1");
-    res.json({
-      status: "ok",
-      db: "connected",
-      env: process.env.NODE_ENV,
-    });
-  } catch (err) {
+    await pool.connect();
+    console.log("DB connected");
+    const result = await pool.query("SELECT * FROM users");
+    res.json(result.rows);
+  } catch (err: any) {
     console.error("DB ERROR:", err);
-    res.status(500).json({ message: "DB connection failed" });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-/* =========================
-   Static (optional)
-   ========================= */
+// ====== Setup HTTP server + Socket.IO ======
 app.use(express.static(path.join(__dirname, "../public")));
+const server = http.createServer(app); // สร้าง HTTP server จาก Express
 
-/* =========================
-   Socket.IO
-   ========================= */
 export const io = new Server(server, {
-  cors: {
-    origin: FRONTEND_ORIGIN,
-    credentials: true,
-  },
+    cors: {
+        origin: "*",
+    }
 });
 
-/* =========================
-   Socket Auth
-   ========================= */
 io.on("connection", async (socket: Socket) => {
-  try {
-    const token = socket.handshake.auth?.token;
+    try {
+        const token = socket.handshake.auth?.token;
 
-    if (!token) {
-      console.warn("❌ No widget token");
-      return socket.disconnect();
+        if (!token) {
+            console.warn("No widget token");
+            return socket.disconnect();
+        }
+
+        const result = await pool.query(
+            `SELECT steamer_id FROM steamers_user WHERE widget_token = $1`,
+            [token]
+        );
+
+        if (!result.rowCount) {
+            console.warn(" Invalid widget token");
+            return socket.disconnect();
+        }
+
+        const steamerId = result.rows[0].steamer_id;
+
+        socket.join(`widget:${steamerId}`);
+
+        console.log(`Widget connected → steamer ${steamerId}`);
+
+        socket.on("disconnect", () => {
+            console.log(`Widget disconnected → steamer ${steamerId}`);
+        });
+
+    } catch (err) {
+        console.error("Socket auth error:", err);
+        socket.disconnect();
     }
-
-    const result = await pool.query(
-      `SELECT steamer_id FROM steamers_user WHERE widget_token = $1`,
-      [token]
-    );
-
-    if (!result.rowCount) {
-      console.warn("❌ Invalid widget token");
-      return socket.disconnect();
-    }
-
-    const steamerId = result.rows[0].steamer_id;
-    socket.join(`widget:${steamerId}`);
-
-    console.log(`🔌 Widget connected → steamer ${steamerId}`);
-
-    socket.on("disconnect", () => {
-      console.log(`❌ Widget disconnected → steamer ${steamerId}`);
-    });
-  } catch (err) {
-    console.error("Socket auth error:", err);
-    socket.disconnect();
-  }
 });
-
-/* =========================
-   Emit Donation
-   ========================= */
+// Function ส่งโดเนทไป client
 export function emitDonation(data: {
-  steamerId: number;
-  donate_by: string;
-  amount: number;
-  donate_details?: string;
-  soundUrl?: string;
-  preview?: boolean;
-  widgetType?: number;
+    steamerId: number;
+    donate_by: string;
+    amount: number;
+    donate_details?: string;
+    soundUrl?: string;
+    preview?:boolean;
+    widgetType?:number;
 }) {
-  io.to(`widget:${data.steamerId}`).emit("donationUpdate", {
-    donate_by: data.donate_by,
-    amount: data.amount,
-    donate_details: data.donate_details,
-    soundUrl: data.soundUrl,
-    preview: data.preview,
-    widgetType: data.widgetType,
-  });
+    io.to(`widget:${data.steamerId}`).emit("donationUpdate", {
+        donate_by: data.donate_by,
+        amount: data.amount,
+        donate_details: data.donate_details,
+        soundUrl: data.soundUrl,
+        preview:data?.preview,
+        widgetType:data?.widgetType
+    });
 }
 
-/* =========================
-   Start Server
-   ========================= */
+// Start server
 server.listen(PORT, () => {
-  console.log("================================");
-  console.log("🚀 Server started");
-  console.log(`🌍 ENV : ${process.env.NODE_ENV}`);
-  console.log(`📡 PORT: ${PORT}`);
-  console.log("================================");
+    console.log(`Server is running at http://localhost:${PORT}`);
 });
 
-/* =========================
-   Graceful Shutdown
-   ========================= */
-const shutdown = () => {
-  console.log("🛑 Shutting down server...");
-  server.close(() => {
-    console.log("✅ HTTP server closed");
-    pool.end().finally(() => {
-      console.log("✅ DB pool closed");
-      process.exit(0);
-    });
-  });
-};
 
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
+

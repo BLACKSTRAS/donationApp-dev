@@ -19,9 +19,10 @@ type DonationRow = {
   status: string;
 };
 
+
 type DashboardRes = {
   message: string;
-  /* สำรหับ input ด้านบน */
+ /* สำรหับ input ด้านบน */
   stats: {
     todayIncome: number;
     totalIncome: number;
@@ -43,6 +44,8 @@ interface CardConfig {
 }
 
 const Management = () => {
+  const { user } = useAuth();
+  const userName = user?.userName;
   const [range, setRange] = useState<RangeKey>("all");
   const [donations, setDonations] = useState<DonationRow[]>([]);
   const [stats, setStats] = useState({
@@ -70,6 +73,7 @@ const Management = () => {
 
         setStats(data.stats);
         setDonations(data.donations ?? []);
+
       } catch (e) {
         console.error(e);
       }
@@ -107,10 +111,6 @@ const Management = () => {
     ],
     [stats]
   );
-  const auth = useAuth();
-  if (!auth) return null; // กัน prerender
-  const { user } = auth;
-  const userName = user?.userName;
 
   return (
     <div className="min-h-screen text-white">
